@@ -1,0 +1,62 @@
+{
+  "name": "pi-sticky-message",
+  "version": "0.1.0",
+  "description": "Pi extension: a sticky one-line header at the top of the fullscreen transcript showing the message you are currently reading, with click-to-jump between messages.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Asianfleet",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Asianfleet/pi-sticky-message.git"
+  },
+  "homepage": "https://github.com/Asianfleet/pi-sticky-message#readme",
+  "bugs": {
+    "url": "https://github.com/Asianfleet/pi-sticky-message/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "pi",
+    "pi-extension",
+    "pi-coding-agent",
+    "coding-agent",
+    "tui",
+    "sticky-header",
+    "sticky-message",
+    "transcript",
+    "navigation",
+    "codex"
+  ],
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test",
+    "prepublishOnly": "npm run check"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^1.4.0",
+    "@earendil-works/pi-tui": "^1.4.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
