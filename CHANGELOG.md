@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Add a README preview image (generated from `assets/preview.html`) and the `pi.image` gallery field.
+
 ## 0.1.0
 
 Initial release.

@@ -4,11 +4,9 @@ A sticky one-line header for the [Pi](https://pi.dev) coding agent's fullscreen 
 
 Inspired by Codex's sticky message header. Built because scrolling up in a long Pi session leaves you without any idea which prompt or reply you are looking at.
 
-```
- 让我把这个插件发布到 npm 上…                                    ↑
-──────────────────────────────────────────────────────────────────
- [ transcript continues here, nothing is covered ]
-```
+![sticky row at the top of the pi transcript](assets/preview.png)
+
+The row sits above the transcript and shows the first line of the message you are currently reading. It hides when you scroll back to the top, and when you land on a message start by clicking it.
 
 ## Install
 
@@ -80,6 +78,15 @@ npm run check     # tsc --noEmit + node --test
 ```
 
 Tests run on Node's native TypeScript stripping; no build step, and no compiled output is published — Pi loads `src/index.ts` directly through jiti.
+
+The README preview is generated from [`assets/preview.html`](assets/preview.html):
+
+```bash
+chrome --headless=new --hide-scrollbars --force-device-scale-factor=2 \
+  --window-size=1560,660 --screenshot=/tmp/shot.png assets/preview.html
+magick /tmp/shot.png -fuzz 6% -trim +repage -bordercolor '#0f0f13' -border 40 \
+  -resize 1800x assets/preview.png
+```
 
 ## License
 

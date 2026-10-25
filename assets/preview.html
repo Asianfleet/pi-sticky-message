@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<style>
+			* { box-sizing: border-box; }
+
+			body {
+				margin: 0;
+				padding: 44px 44px 42px;
+				background: #0f0f13;
+				font-family: "JetBrains Mono", "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+				-webkit-font-smoothing: antialiased;
+			}
+
+			.wrap { display: flex; align-items: flex-start; }
+
+			.terminal {
+				width: 1080px;
+				border-radius: 12px;
+				overflow: hidden;
+				background: #1a1b26;
+				box-shadow: 0 0 0 1px #2a2b38, 0 26px 64px rgba(0, 0, 0, 0.62);
+			}
+
+			.titlebar {
+				display: flex;
+				align-items: center;
+				gap: 9px;
+				height: 34px;
+				padding: 0 15px;
+				background: #16161e;
+				border-bottom: 1px solid #2f3549;
+			}
+
+			.dot { width: 11px; height: 11px; border-radius: 50%; }
+			.dot.red { background: #f7768e; }
+			.dot.yellow { background: #e0af68; }
+			.dot.green { background: #9ece6a; }
+			.titlebar .title { margin-left: 10px; color: #414868; font-size: 12.5px; }
+
+			.screen { font-size: 15px; line-height: 1.6; color: #c0caf5; }
+
+			/* ===== 主角：粘性消息条（第 0 行，不遮挡正文） ===== */
+			.sticky {
+				display: flex;
+				align-items: center;
+				height: 31px;
+				padding: 0 12px 0 10px;
+				background: #3b4261;
+				color: #dde3ff;
+			}
+
+			.sticky .text {
+				flex: 1;
+				min-width: 0;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.sticky .hint { color: #9aa4d0; padding-left: 12px; }
+
+			/* ===== 正文：从一条消息的中间开始，表示已经滚过去了 ===== */
+			.body { padding: 14px 16px 0 10px; }
+
+			.line { margin: 0; }
+			.faded { color: #8f97bd; }
+			.gap { height: 11px; }
+
+			.tool { display: flex; align-items: baseline; gap: 7px; }
+			.tool .bullet { color: #9ece6a; }
+			.tool .verb { color: #c0caf5; font-weight: 700; }
+			.tool .arg { color: #a3abcf; }
+
+			.detail {
+				display: flex;
+				gap: 7px;
+				color: #4a5378;
+				padding-left: 3px;
+			}
+
+			.strong { color: #e6ecff; font-weight: 700; }
+			.cursor {
+				display: inline-block;
+				width: 8px;
+				height: 16px;
+				background: #c0caf5;
+				vertical-align: -3px;
+				margin-left: 2px;
+			}
+
+			.editor {
+				margin: 14px 8px 0;
+				border: 1px solid #2f3549;
+				border-radius: 6px;
+				padding: 8px 12px;
+				color: #414868;
+			}
+
+			.footer {
+				display: flex;
+				justify-content: space-between;
+				margin: 9px 8px 12px;
+				color: #414868;
+				font-size: 12.5px;
+			}
+
+			/* ===== 右侧标注 ===== */
+			.notes {
+				position: relative;
+				width: 306px;
+				margin-left: 58px;
+				padding-top: 43px;
+			}
+
+			/* 指向粘性条中心（34 标题栏 + 15.5）的引线 */
+			.notes::before {
+				content: "";
+				position: absolute;
+				left: -58px;
+				top: 49px;
+				width: 44px;
+				height: 1px;
+				background: #4a5170;
+			}
+
+			.notes .label {
+				color: #e6ecff;
+				font-size: 17px;
+				font-weight: 700;
+				letter-spacing: 0.01em;
+			}
+
+			.notes .sub {
+				margin-top: 9px;
+				color: #8b93b8;
+				font-size: 13px;
+				line-height: 1.75;
+			}
+
+			.notes ul {
+				margin: 14px 0 0;
+				padding: 0;
+				list-style: none;
+				color: #7f88ae;
+				font-size: 13px;
+				line-height: 1.95;
+			}
+
+			.notes li::before { content: "· "; color: #4a5170; }
+			.notes code { color: #a9b4e0; }
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<div class="terminal">
+				<div class="titlebar">
+					<span class="dot red"></span>
+					<span class="dot yellow"></span>
+					<span class="dot green"></span>
+					<span class="title">pi — ~/projects/pi-sticky-message</span>
+				</div>
+
+				<div class="screen">
+					<div class="sticky">
+						<span class="text">Publish the plugin to npm, then write a README explaining how to use it</span>
+						<span class="hint">↑</span>
+					</div>
+
+					<div class="body">
+						<p class="line faded">…checks pass. Tarball is 14.3 kB, 13 files.</p>
+						<div class="gap"></div>
+						<div class="tool">
+							<span class="bullet">•</span><span class="verb">Ran</span
+							><span class="arg">npm run check</span>
+						</div>
+						<div class="detail">
+							<span>└</span><span>tsc --noEmit &amp;&amp; node --test … · 34 tests passed</span>
+						</div>
+						<div class="gap"></div>
+						<p class="line">Next: README, covering install, the four interactions, and the limits.</p>
+						<div class="gap"></div>
+						<div class="tool">
+							<span class="bullet">•</span><span class="verb">Wrote</span
+							><span class="arg">README.md</span>
+						</div>
+						<div class="detail"><span>└</span><span>+96 lines</span></div>
+						<div class="gap"></div>
+						<p class="line">
+							Scrolling back up now — the row above keeps telling you which message you are in.<span
+								class="cursor"
+							></span>
+						</p>
+						<div class="editor">Ask pi anything…</div>
+						<div class="footer">
+							<span>deepseek-v4.1-flash · high</span>
+							<span>~/projects/pi-sticky-message · main</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="notes">
+				<div class="label">sticky row</div>
+				<div class="sub">
+					First line of the message at the top of the viewport, pinned above the transcript. It is a real
+					layout row, so nothing is covered.
+				</div>
+				<ul>
+					<li>left click — jump to that message</li>
+					<li>right click — next message</li>
+					<li>follows pi's <code>Ctrl+Shift+↑/↓</code> units</li>
+				</ul>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,6 +1,6 @@
 {
   "name": "pi-sticky-message",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pi extension: a sticky one-line header at the top of the fullscreen transcript showing the message you are currently reading, with click-to-jump between messages.",
   "type": "module",
   "license": "MIT",
@@ -28,6 +28,7 @@
   ],
   "files": [
     "src",
+    "assets/preview.png",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
@@ -35,7 +36,8 @@
   "pi": {
     "extensions": [
       "./src/index.ts"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/Asianfleet/pi-sticky-message/main/assets/preview.png"
   },
   "scripts": {
     "test": "node --experimental-strip-types --test tests/*.test.ts",
