@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Fix the row background not covering the ellipsis, the right-hand hint, and the trailing padding. `truncateToWidth` emits a full `\x1b[0m` reset around the ellipsis, which cancelled the background for the rest of the line; escapes are now stripped before styling and the background is re-asserted after every internal reset.
+- Add render-level regression tests that check, for widths 12–140 and several label shapes, that the row is exactly as wide as requested, that every cell is covered, that truncation always shows the ellipsis, and that no escape sequence leaks into the text.
+
 ## 0.1.1
 
 - Add a README preview image (generated from `assets/preview.html`) and the `pi.image` gallery field.

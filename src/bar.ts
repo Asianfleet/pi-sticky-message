@@ -9,6 +9,8 @@
 
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import {
+	backgroundAnsi,
+	stripTerminalSequences,
 	truncateToWidth,
 	visibleWidth,
 	type Color,
@@ -146,12 +148,15 @@ export class StickyMessageBar implements Component {
 		const useHint = config.hint && available > hintWidth + HINT_MIN_ROOM;
 		const labelWidth = useHint ? available - hintWidth : available;
 
-		const text = truncateToWidth(label, labelWidth, "…");
+		// truncateToWidth 在插入省略号前后会带出 \x1b[0m 全量 reset，这些序列会把整行背景清掉，
+		// 所以先剥干净（零宽，不影响排版），颜色统一由下面自己上。
+		const clipped = truncateToWidth(label, labelWidth, "…");
+		const text = stripTerminalSequences(clipped);
 		const textWidth = visibleWidth(text);
 		const gap = " ".repeat(Math.max(0, available - textWidth - (useHint ? hintWidth : 0)));
 		const used = leftPadCount + textWidth + gap.length + (useHint ? hintWidth : 0);
 
-		const styled =
+		const body =
 			" ".repeat(leftPadCount) +
 			this.theme.fg("text", text) +
 			gap +
@@ -159,7 +164,19 @@ export class StickyMessageBar implements Component {
 			" ".repeat(Math.max(0, width - used));
 
 		const background = this.background(config.contrast);
-		return background ? this.theme.style(styled, { bg: background }) : this.theme.bg("selectedBg", styled);
+		if (!background) return this.theme.bg("selectedBg", body);
+
+		// 手动持住背景：任何内部 reset（\x1b[0m / \x1b[49m）之后重新打开，
+		// 保证高亮覆盖整行包括省略号、右侧提示和补白。
+		const open = backgroundAnsi(background, this.colorMode());
+		const guarded = body.replace(/\u001b\[(?:0|49)m/g, (match) => `${match}${open}`);
+		return `${open}${guarded}\u001b[49m`;
+	}
+
+	/** 终端色彩模式；主题对象上取不到时回退到 truecolor。 */
+	private colorMode(): "256color" | "truecolor" {
+		const mode = (this.theme as { getColorMode?: () => string }).getColorMode?.();
+		return mode === "256color" ? "256color" : "truecolor";
 	}
 
 	/** 比主题 selectedBg 更亮一档的背景色；取不到时返回 undefined，回退到 selectedBg。 */

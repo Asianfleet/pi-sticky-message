@@ -227,20 +227,21 @@ test("follows a replaced layout root and reattaches after detach", () => {
 	assert.equal(newRoot.entries[0]!.component, world.bar, "下一帧自动插回");
 });
 
-test("background comes from the theme and is cached per (theme, contrast)", () => {
+test("background is a real colour escape that follows the contrast setting", () => {
 	const world = makeWorld();
 	world.transcript.scrollTop = world.zones[1]! + 2;
 
-	world.bar.render(40);
-	const first = world.backgrounds.length;
-	assert.ok(first > 0, "混色结果被使用");
+	// 真实背景色以 ANSI 序列出现在行首（theme 桩不做样式转换）
+	const bgOf = (line: string) => /\[48;[25];[0-9;]+m/.exec(line)?.[0];
+	const first = bgOf(world.bar.render(40)[0]!);
+	assert.ok(first, "行首应有背景色序列");
 
-	world.bar.render(40);
-	assert.equal(world.backgrounds.length - first, 1, "同一主题同一 contrast 只算一次");
+	assert.equal(bgOf(world.bar.render(40)[0]!), first, "同 contrast 结果稳定");
 
 	world.setConfig({ contrast: 0.6 });
-	world.bar.render(40);
-	assert.ok(world.backgrounds.length > first + 1, "改 contrast 后重算");
+	const brighter = bgOf(world.bar.render(40)[0]!);
+	assert.ok(brighter, "改 contrast 后仍有背景色");
+	assert.notEqual(brighter, first, "contrast 变了背景色应随之变化");
 });
 
 test("diagnose reports what the bar found", () => {
