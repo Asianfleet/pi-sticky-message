@@ -1,5 +1,7 @@
 # pi-sticky-message
 
+English | [简体中文](./README.zh-CN.md)
+
 A sticky one-line header for the [Pi](https://pi.dev) coding agent's fullscreen transcript: it always shows the first line of the message you are currently reading, and clicking it jumps between messages.
 
 Inspired by Codex's sticky message header. Built because scrolling up in a long Pi session leaves you without any idea which prompt or reply you are looking at.
