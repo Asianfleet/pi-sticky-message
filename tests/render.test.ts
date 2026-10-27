@@ -50,9 +50,9 @@ function cells(line: string): { ch: string; bg: boolean }[] {
 	return result;
 }
 
-function renderBar(label: string, width: number, overrides: Partial<StickyMessageConfig> = {}): string {
+function renderBarLines(lines: string[], width: number, overrides: Partial<StickyMessageConfig> = {}): string {
 	const document = {
-		render: () => [`\u001b]133;A\u0007${label}`],
+		render: () => lines.map((line, index) => (index === 0 ? `\u001b]133;A\u0007${line}` : line)),
 		invalidate() {},
 		children: [],
 	};
@@ -73,9 +73,13 @@ function renderBar(label: string, width: number, overrides: Partial<StickyMessag
 		mode: "fullscreen",
 		requestRender() {},
 	};
-	let config: StickyMessageConfig = { ...DEFAULT_CONFIG, ...overrides };
+	const config: StickyMessageConfig = { ...DEFAULT_CONFIG, ...overrides };
 	const bar = new StickyMessageBar(tui as never, theme as never, () => config);
 	return bar.render(width)[0] ?? "";
+}
+
+function renderBar(label: string, width: number, overrides: Partial<StickyMessageConfig> = {}): string {
+	return renderBarLines([label], width, overrides);
 }
 
 const LABELS = [
@@ -135,12 +139,34 @@ test("pad and hint configurations keep full coverage", () => {
 	}
 });
 
-test("hint is dropped when there is no room for it", () => {
-	// 规则：available > 提示宽(2) + 10，leftPad=1 时宽度需 >= 14 才有提示
+test("hint is dropped when there is no room for it", () => {	// 规则：available > 提示宽(2) + 10，leftPad=1 时宽度需 >= 14 才有提示
 	const narrow = cells(renderBar(LABELS[0]!, 12)).map((cell) => cell.ch).join("");
 	assert.ok(!narrow.includes("↑"), "窄宽度放弃提示");
 	const fits = cells(renderBar(LABELS[0]!, 40)).map((cell) => cell.ch).join("");
 	assert.ok(fits.includes("↑"), "宽度够时保留提示");
 	const wide = cells(renderBar(LABELS[0]!, 120)).map((cell) => cell.ch).join("");
 	assert.ok(wide.includes("↑"), "宽宽度保留提示");
+});
+
+test("a message whose first visual line fits still gets an ellipsis", () => {
+	// 复现真实换行：transcript 按词换行，首行只有 8 列，后面还有两行。
+	// 旧实现只把首个视觉行当标签，于是判定"塞得下"、不加省略号，看起来像被硬切。
+	const lines = [
+		"I should",
+		"give you a much more detailed explanation of what is happening here,",
+		"because the ellipsis keeps disappearing at certain widths.",
+	];
+	const joined = lines.join(" ");
+	for (let width = 14; width <= 140; width += 1) {
+		// 消息总宽真的塞不下时才要求省略号；塞得下就是完整显示，本来就不该有
+		if (visibleWidth(joined) <= width - 3) continue;
+		const plain = cells(renderBarLines(lines, width)).map((cell) => cell.ch).join("");
+		assert.ok(plain.includes("…"), `w=${width} 消息还有后续内容却没有省略号：${JSON.stringify(plain)}`);
+	}
+});
+
+test("a message that fits on one line keeps no ellipsis", () => {
+	const plain = cells(renderBar("short", 60)).map((cell) => cell.ch).join("");
+	assert.ok(!plain.includes("…"), "短消息不该出现省略号");
+	assert.ok(plain.includes("short"));
 });

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Fix the ellipsis appearing at some widths but not others. The bar used the message's first **visual** line as its label, and transcript text is word-wrapped, so that line is always narrower than the message by a word's leftover (0–10 columns). Whenever the leftover happened to make the line fit, `truncateToWidth` decided nothing needed cutting, so a message that clearly continued rendered as an abrupt cutoff with no ellipsis. The label is now the message's wrapped lines joined into one line (up to the bar width), so the ellipsis appears whenever the message does not fit.
+- Chinese README (`README.zh-CN.md`) with a language switcher, and a paragraph stating what sets the row apart.
+
 ## 0.1.2
 
 - Fix the row background not covering the ellipsis, the right-hand hint, and the trailing padding. `truncateToWidth` emits a full `\x1b[0m` reset around the ellipsis, which cancelled the background for the rest of the line; escapes are now stripped before styling and the background is re-asserted after every internal reset.

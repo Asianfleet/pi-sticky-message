@@ -19,7 +19,7 @@ test("toPlainText strips OSC zone markers, CSI styling and control chars", () =>
 	assert.equal(toPlainText(""), "");
 });
 
-test("collectZones finds message starts and their first non-empty line", () => {
+test("collectZones joins a message's wrapped lines into one label", () => {
 	const lines = [
 		"",
 		"  pi v1.4.0 启动头",
@@ -32,8 +32,17 @@ test("collectZones finds message starts and their first non-empty line", () => {
 	];
 	const { zoneStarts, zoneLabels } = collectZones(lines);
 	assert.deepEqual(zoneStarts, [3, 5]);
+	// 标签是“该消息若干视觉行拼起来的一条”，不是只有首个视觉行（否则换行后的内容会被隐式切掉）；
 	// 第二条消息首行是空的区域标记行，应继续往下找到第一个非空行
-	assert.deepEqual(zoneLabels, ["第一条用户消息", "第二条的首行在这一行"]);
+	assert.deepEqual(zoneLabels, ["第一条用户消息 body", "第二条的首行在这一行 body"]);
+});
+
+test("collectZones stops joining once the budget is exceeded", () => {
+	const lines = [`${ZONE}aaa`, "bbb", "ccc"];
+	// “aaa” 宽 3 不超预算 3，再拼上 “bbb” 就 7 了，于是停手
+	assert.deepEqual(collectZones(lines, 3).zoneLabels, ["aaa bbb"]);
+	// 预算够大则拼到区域末尾
+	assert.deepEqual(collectZones(lines, 100).zoneLabels, ["aaa bbb ccc"]);
 });
 
 test("collectZones returns empty result for a document without zones", () => {
@@ -112,7 +121,7 @@ test("measureDocument records width, line count and zones", () => {
 	assert.equal(measurement.width, 40);
 	assert.equal(measurement.total, 3);
 	assert.deepEqual(measurement.zoneStarts, [0]);
-	assert.deepEqual(measurement.zoneLabels, ["标题"]);
+	assert.deepEqual(measurement.zoneLabels, ["标题 body body"]);
 });
 
 test("normalizeConfig clamps and falls back", () => {

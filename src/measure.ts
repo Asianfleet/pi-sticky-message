@@ -9,11 +9,20 @@
  */
 
 import type { Component } from "@earendil-works/pi-tui";
+import { visibleWidth } from "@earendil-works/pi-tui";
 
 import { toPlainText, ZONE_START } from "./text.ts";
 
 /** 测量结果缓存有效期（毫秒）。 */
 export const MEASURE_TTL_MS = 400;
+
+/**
+ * 标签拼接预算：比条宽多一点。
+ *
+ * 拼到比条宽还宽就够截出省略号了，再多只是浪费；而预算必须**大于**条内可用宽度，
+ * 否则可能刚好停在“还没超出”的位置，又退化成“首行塞得下就不显示省略号”。
+ */
+const LABEL_BUDGET_EXTRA = 8;
 
 export interface Measurement {
 	/** 测量时使用的宽度。 */
@@ -28,8 +37,20 @@ export interface Measurement {
 	zoneLabels: string[];
 }
 
-/** 从渲染好的文档行里扫出消息起始行与每条消息的首行文字。 */
-export function collectZones(lines: string[]): { zoneStarts: number[]; zoneLabels: string[] } {
+/**
+ * 从渲染好的文档行里扫出消息起始行与每条消息的标签文字。
+ *
+ * 标签不是“首个视觉行”而是“该消息的连续若干视觉行拼起来的一条”：transcript 正文按词换行，
+ * 首个视觉行必然比宽度窄一个词的余数（0~10 列），只取它会出现“内容明明还有下一行、
+ * 但这一行恰好塞得下所以不显示省略号”的假截断。拼接后只要消息真的还有内容，
+ * 标签就一定超出可用宽度，省略号就一定会出现。
+ *
+ * `labelBudget` 限定拼接宽度，超出即停止（后面的文字本来也会被省略号截掉）。
+ */
+export function collectZones(
+	lines: string[],
+	labelBudget = Number.POSITIVE_INFINITY,
+): { zoneStarts: number[]; zoneLabels: string[] } {
 	const zoneStarts: number[] = [];
 	for (let row = 0; row < lines.length; row += 1) {
 		if ((lines[row] ?? "").startsWith(ZONE_START)) zoneStarts.push(row);
@@ -42,10 +63,9 @@ export function collectZones(lines: string[]): { zoneStarts: number[]; zoneLabel
 		let label = "";
 		for (let row = start; row < end; row += 1) {
 			const text = toPlainText(lines[row] ?? "");
-			if (text) {
-				label = text;
-				break;
-			}
+			if (!text) continue;
+			label = label === "" ? text : `${label} ${text}`;
+			if (visibleWidth(label) > labelBudget) break;
 		}
 		zoneLabels.push(label);
 	}
@@ -105,6 +125,6 @@ export function measureDocument(
 	} catch {
 		return undefined;
 	}
-	const { zoneStarts, zoneLabels } = collectZones(lines);
+	const { zoneStarts, zoneLabels } = collectZones(lines, width + LABEL_BUDGET_EXTRA);
 	return { width, at: Date.now(), total: lines.length, zoneStarts, zoneLabels };
 }

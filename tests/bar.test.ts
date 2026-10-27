@@ -250,7 +250,7 @@ test("diagnose reports what the bar found", () => {
 	const summary = world.bar.diagnose();
 	assert.match(summary, /attached=true/);
 	assert.match(summary, /zones=3/);
-	assert.match(summary, /label="第二条助手回复"/);
+	assert.match(summary, /label="第二条助手回复 body 0/);
 });
 
 test("transcript helpers find the primary scroll view and the layout root", () => {
