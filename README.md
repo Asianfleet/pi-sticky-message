@@ -8,6 +8,8 @@ Inspired by Codex's sticky message header. Built because scrolling up in a long 
 
 The row sits above the transcript and shows the first line of the message you are currently reading. It hides when you scroll back to the top, and when you land on a message start by clicking it.
 
+What makes this one different: it tracks **every** message — prompts, replies, and tool blocks alike — not just the last thing you typed, and it is a real layout row rather than an overlay. Nothing is drawn over the transcript, the viewport simply shrinks by one line, and no private Pi internals are patched, so scrollbar dragging and text selection keep working on their own and the row survives Pi upgrades.
+
 ## Install
 
 ```bash
